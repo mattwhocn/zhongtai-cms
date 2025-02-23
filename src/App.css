@@ -36,3 +36,40 @@
     transform: rotate(360deg);
   }
 }
+
+.layout {
+  min-height: 100vh;
+}
+
+.logo {
+  float: left;
+  width: 120px;
+  height: 31px;
+  margin: 16px 24px 16px 0;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.upload-section {
+  margin-bottom: 24px;
+}
+
+.image-management .ant-card-body {
+  padding: 24px;
+}
+
+.content-management .ant-card-body {
+  padding: 24px;
+}
+
+.ant-upload-select {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.custom-message {
+  z-index: 2000;
+}
+
+.ant-message-notice-content {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
