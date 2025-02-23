@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Button, Table, message, Space, Tag, Card, Modal } from 'antd';
+import { Upload, Button, Table, message, Space, Tag, Card, Modal, Tabs } from 'antd';
 import { 
   UploadOutlined, 
   CheckCircleOutlined, 
@@ -7,8 +7,20 @@ import {
   DeleteOutlined 
 } from '@ant-design/icons';
 import axios from 'axios';
+import config, { getApiUrl, getResourceUrl } from '../config/config';
+
+const MODULES = [
+  { key: 'home', label: '首页' },
+  { key: 'news', label: '新闻' },
+  { key: 'about', label: '关于' },
+  { key: 'sustainability', label: '可持续发展' },
+  { key: 'career', label: '招聘' },
+  { key: 'contact', label: '联系' },
+  { key: 'business', label: '业务' }
+];
 
 const ContentManagement = () => {
+  const [currentModule, setCurrentModule] = useState('home');
   const [contentList, setContentList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -16,12 +28,14 @@ const ContentManagement = () => {
 
   useEffect(() => {
     fetchContentList();
-  }, []);
+  }, [currentModule]);
 
   const fetchContentList = async () => {
     setLoading(true);
     try {
-      const response = await axios.get('http://localhost:3001/content/list');
+      const response = await axios.get(getApiUrl(config.api.content.list), {
+        params: { module: currentModule }
+      });
       setContentList(response.data.data || []);
     } catch (error) {
       message.error('获取内容列表失败');
@@ -33,9 +47,10 @@ const ContentManagement = () => {
   const handleUpload = async (file) => {
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('module', currentModule);
 
     try {
-      const response = await axios.post('http://localhost:3001/content/upload', formData);
+      const response = await axios.post(getApiUrl(config.api.content.upload), formData);
       if (response.data.success) {
         message.success('上传成功');
         fetchContentList();
@@ -49,10 +64,11 @@ const ContentManagement = () => {
 
   const handleUse = async (record) => {
     try {
-      const response = await axios.get(`http://localhost:3001/content/use`, {
+      const response = await axios.get(getApiUrl(config.api.content.use), {
         params: {
           id: record.id,
-          path: record.path
+          path: record.path,
+          module: currentModule
         }
       });
       if (response.data.success) {
@@ -68,7 +84,7 @@ const ContentManagement = () => {
 
   const handleDownload = async (path, originalName) => {
     try {
-      const response = await axios.get(`http://localhost:3001/${path}`, {
+      const response = await axios.get(getResourceUrl(path), {
         responseType: 'blob'
       });
       
@@ -104,7 +120,7 @@ const ContentManagement = () => {
     if (!currentContent) return;
 
     try {
-      const response = await axios.get(`http://localhost:3001/content/del`, {
+      const response = await axios.get(getApiUrl(config.api.content.delete), {
         params: {
           id: currentContent.id,
           path: currentContent.path
@@ -130,18 +146,14 @@ const ContentManagement = () => {
       title: '文件名',
       dataIndex: 'name',
       key: 'name',
-      width: 400,
-      ellipsis: true,
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      key: 'status',
-      width: 80,
-      render: (status) => (
-        <Tag color={status === 'used' ? 'green' : 'blue'}>
-          {status === 'used' ? '已使用' : '未使用'}
-        </Tag>
+      width: 450,
+      render: (name, record) => (
+        <Space>
+          {name}
+          <Tag color={record.status === 'used' ? 'green' : 'blue'}>
+            {record.status === 'used' ? '使用中' : '未使用'}
+          </Tag>
+        </Space>
       ),
     },
     {
@@ -189,18 +201,30 @@ const ContentManagement = () => {
     },
   ];
 
-  return (
-    <Card title="内容管理" className="content-management" size="small">
-      <div className="upload-section" style={{ marginBottom: '16px' }}>
+  const handleTabChange = (key) => {
+    setCurrentModule(key);
+  };
+
+  const ContentTable = () => (
+    <>
+      <div className="upload-section" style={{ marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Upload
           customRequest={({ file }) => handleUpload(file)}
           showUploadList={false}
-          accept=".xlsx,.xls,.doc,.docx,.pdf"
+          accept=".xlsx,.xls"
         >
-          <Button icon={<UploadOutlined />} type="primary" size="small">
+          <Button 
+            icon={<UploadOutlined />} 
+            type="primary" 
+            size="middle"
+            disabled={contentList.length >= 8}
+          >
             上传内容
           </Button>
         </Upload>
+        <span style={{ color: '#666' }}>
+          已上传: {contentList.length}/8
+        </span>
       </div>
 
       <Table
@@ -213,6 +237,25 @@ const ContentManagement = () => {
         size="small"
         bordered
       />
+    </>
+  );
+
+  const items = MODULES.map(module => ({
+    key: module.key,
+    label: module.label,
+    children: <ContentTable />
+  }));
+
+  return (
+    <Card title="内容管理" className="content-management" size="small">
+      <Tabs
+        activeKey={currentModule}
+        onChange={handleTabChange}
+        items={items}
+        type="card"
+        size="small"
+        style={{ marginBottom: '16px' }}
+      />
 
       <Modal
         title="确认删除"
@@ -224,8 +267,10 @@ const ContentManagement = () => {
         }}
         okText="确认"
         cancelText="取消"
+        okButtonProps={{ danger: true }}
       >
-        <p>确定要删除这个文件吗？</p>
+        <p>确定要删除文件 "{currentContent?.name}" 吗？</p>
+        <p style={{ color: '#999', fontSize: '12px' }}>删除后将无法恢复，请谨慎操作。</p>
       </Modal>
     </Card>
   );

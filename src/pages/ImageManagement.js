@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Button, Card, Table, message, Modal, Space } from 'antd';
-import { DeleteOutlined, EyeOutlined, CopyOutlined } from '@ant-design/icons';
+import { Button, Card, Table, message, Modal, Space, Upload } from 'antd';
+import { DeleteOutlined, EyeOutlined, CopyOutlined, UploadOutlined } from '@ant-design/icons';
 import { useImageList } from '../hooks/useImageList';
-import { ImageUploader } from '../components/ImageUploader';
 import { copyToClipboard } from '../utils/copyUtils';
 import axios from 'axios';
+import config, { getApiUrl, getResourceUrl } from '../config/config';
 
 const ImageManagement = () => {
   const { imageList, loading, fetchImageList } = useImageList();
@@ -14,7 +14,7 @@ const ImageManagement = () => {
   const [currentImage, setCurrentImage] = useState(null);
 
   const handlePreview = (imagePath) => {
-    setPreviewImage(`http://localhost:3001/${imagePath}`);
+    setPreviewImage(getResourceUrl(imagePath));
     setPreviewVisible(true);
   };
 
@@ -27,7 +27,7 @@ const ImageManagement = () => {
     if (!currentImage) return;
 
     try {
-      const response = await axios.get(`http://localhost:3001/img/del`, {
+      const response = await axios.get(getApiUrl(config.api.image.delete), {
         params: {
           id: currentImage.id,
           path: currentImage.path
@@ -48,6 +48,24 @@ const ImageManagement = () => {
     }
   };
 
+  const handleUpload = async (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('class', 'default');
+
+    try {
+      const response = await axios.post(getApiUrl(config.api.image.upload), formData);
+      if (response.data.success) {
+        message.success('上传成功');
+        fetchImageList();
+      } else {
+        message.error('上传失败');
+      }
+    } catch (error) {
+      message.error('上传失败: ' + error.message);
+    }
+  };
+
   const columns = [
     {
       title: '缩略图',
@@ -56,7 +74,7 @@ const ImageManagement = () => {
       width: 80,
       render: (path) => (
         <img
-          src={`http://localhost:3001/${path}`}
+          src={getResourceUrl(path)}
           alt="缩略图"
           style={{ width: 40, height: 40, objectFit: 'cover', cursor: 'pointer' }}
           onClick={() => handlePreview(path)}
@@ -77,11 +95,18 @@ const ImageManagement = () => {
       width: 400,
       ellipsis: true,
       render: (path) => {
-        const fullUrl = `http://localhost:3001/${path}`;
+        const fullUrl = getResourceUrl(path);
         return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
             <span
-              style={{ color: '#666', cursor: 'pointer', flex: 1 }}
+              style={{ 
+                color: '#666', 
+                cursor: 'pointer',
+                marginRight: '4px',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap'
+              }}
               onClick={() => copyToClipboard(fullUrl)}
               title="点击复制图片地址"
             >
@@ -93,6 +118,7 @@ const ImageManagement = () => {
               icon={<CopyOutlined />}
               onClick={() => copyToClipboard(fullUrl)}
               title="复制图片地址"
+              style={{ padding: '0 4px', minWidth: 'auto' }}
             />
           </div>
         );
@@ -136,7 +162,17 @@ const ImageManagement = () => {
 
   return (
     <Card title="图片管理" className="image-management">
-      <ImageUploader onUploadSuccess={fetchImageList} />
+      <div className="upload-section">
+        <Upload
+          customRequest={({ file }) => handleUpload(file)}
+          showUploadList={false}
+          accept="image/*"
+        >
+          <Button icon={<UploadOutlined />} type="primary" size="middle">
+            上传图片
+          </Button>
+        </Upload>
+      </div>
 
       <Table
         columns={columns}

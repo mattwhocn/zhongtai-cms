@@ -43,10 +43,18 @@
 
 .logo {
   float: left;
-  width: 120px;
+  width: auto;
   height: 31px;
   margin: 16px 24px 16px 0;
-  background: rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+}
+
+.logo-text {
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  white-space: nowrap;
 }
 
 .upload-section {
@@ -72,4 +80,27 @@
 
 .ant-message-notice-content {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.content-management .ant-tabs-nav {
+  margin-bottom: 16px;
+}
+
+.content-management .ant-tabs-tab {
+  padding: 8px 16px;
+}
+
+.content-management .ant-tabs-content-holder {
+  padding: 0 1px;
+}
+
+.content-management .upload-section {
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 4px;
+}
+
+.upload-section .ant-btn {
+  min-width: 100px;
+  height: 32px;
 }
