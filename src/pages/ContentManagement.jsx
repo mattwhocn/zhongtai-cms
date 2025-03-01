@@ -10,17 +10,14 @@ import axios from 'axios';
 import config, { getApiUrl, getResourceUrl } from '../config/config';
 
 const MODULES = [
-  { key: 'home', label: '首页' },
+  { key: 'banner', label: '首页banner' },
+  { key: 'tech', label: '科技板块' },
   { key: 'news', label: '新闻' },
-  { key: 'about', label: '关于' },
-  { key: 'sustainability', label: '可持续发展' },
-  { key: 'career', label: '招聘' },
-  { key: 'contact', label: '联系' },
-  { key: 'business', label: '业务' }
+  { key: 'jobs', label: '招聘职位' },
 ];
 
 const ContentManagement = () => {
-  const [currentModule, setCurrentModule] = useState('home');
+  const [currentModule, setCurrentModule] = useState('banner');
   const [contentList, setContentList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -193,6 +190,7 @@ const ContentManagement = () => {
             danger
             icon={<DeleteOutlined />}
             onClick={() => showDeleteConfirm(record)}
+            disabled={record.status === 'used'}
           >
             删除
           </Button>
@@ -213,7 +211,7 @@ const ContentManagement = () => {
           showUploadList={false}
           accept=".xlsx,.xls"
         >
-          <Button 
+          <Button
             icon={<UploadOutlined />} 
             type="primary" 
             size="middle"
@@ -223,7 +221,7 @@ const ContentManagement = () => {
           </Button>
         </Upload>
         <span style={{ color: '#666' }}>
-          已上传: {contentList.length}/8
+          最多上传8个版本，已上传: {contentList.length}/8
         </span>
       </div>
 

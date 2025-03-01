@@ -1,4 +1,4 @@
-const config = {
+export const config = {
   baseURL: 'http://localhost:3001',
   api: {
     // 图片相关接口

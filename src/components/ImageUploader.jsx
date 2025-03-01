@@ -2,6 +2,7 @@ import React from 'react';
 import { Upload, Button, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import config, { getApiUrl } from '../config/config';
 
 export const ImageUploader = ({ onUploadSuccess }) => {
   const handleUpload = async (file) => {
@@ -10,7 +11,7 @@ export const ImageUploader = ({ onUploadSuccess }) => {
     formData.append('class', 'default');
 
     try {
-      const response = await axios.post('http://localhost:3001/img/upload', formData);
+      const response = await axios.post(getApiUrl(config.api.image.upload), formData);
       if (response.data.success) {
         message.success('上传成功');
         onUploadSuccess();
