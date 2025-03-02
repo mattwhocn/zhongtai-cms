@@ -1,5 +1,6 @@
 export const config = {
-  baseURL: 'http://localhost:3002',
+  // baseURL: 'http://localhost:3002',
+  baseURL: 'http://api.ztmagroup.com',
   api: {
     // 图片相关接口
     image: {
