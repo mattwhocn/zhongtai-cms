@@ -1,6 +1,7 @@
 export const config = {
-  // baseURL: 'http://localhost:3002',
-  baseURL: 'http://api.ztmagroup.com',
+  baseURL: process.env.NODE_ENV === 'production' 
+    ? 'http://api.ztmagroup.com'
+    : 'http://localhost:3002',
   api: {
     // 图片相关接口
     image: {
@@ -14,6 +15,12 @@ export const config = {
       list: '/content/list',
       use: '/content/use',
       delete: '/content/del'
+    },
+    // markdown相关接口
+    markdown: {
+      upload: '/markdown/upload',
+      list: '/markdown/list',
+      delete: '/markdown/del'
     }
   }
 };
