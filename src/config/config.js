@@ -2,6 +2,9 @@ export const config = {
   baseURL: process.env.NODE_ENV === 'production' 
     ? 'http://api.ztmagroup.com'
     : 'http://localhost:3002',
+  resourceURL: process.env.NODE_ENV === 'production' 
+    ? 'http://static.ztmagroup.com'
+    : 'http://localhost:3002',
   api: {
     // 图片相关接口
     image: {
@@ -29,6 +32,6 @@ export const config = {
 export const getApiUrl = (path) => `${config.baseURL}${path}`;
 
 // 获取资源的完整URL（图片、文件等）
-export const getResourceUrl = (path) => `${config.baseURL}/${path}`;
+export const getResourceUrl = (path) => `${config.resourceURL}/${path}`;
 
 export default config; 
