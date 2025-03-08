@@ -12,6 +12,7 @@ const ImageManagement = () => {
   const [previewImage, setPreviewImage] = useState('');
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
+  const [uploadLoading, setUploadLoading] = useState(false);
 
   const handlePreview = (imagePath) => {
     setPreviewImage(getResourceUrl(imagePath));
@@ -53,6 +54,8 @@ const ImageManagement = () => {
     formData.append('file', file);
     formData.append('class', 'default');
 
+    setUploadLoading(true);
+
     try {
       const response = await axios.post(getApiUrl(config.api.image.upload), formData);
       if (response.data.success) {
@@ -63,6 +66,8 @@ const ImageManagement = () => {
       }
     } catch (error) {
       message.error('上传失败: ' + error.message);
+    } finally {
+      setUploadLoading(false);
     }
   };
 
@@ -168,8 +173,13 @@ const ImageManagement = () => {
           showUploadList={false}
           accept="image/*"
         >
-          <Button icon={<UploadOutlined />} type="primary" size="middle">
-            上传图片
+          <Button 
+            icon={<UploadOutlined />} 
+            type="primary" 
+            size="middle"
+            loading={uploadLoading}
+          >
+            {uploadLoading ? '上传中' : '上传图片'}
           </Button>
         </Upload>
       </div>

@@ -12,6 +12,7 @@ const MarkdownManagement = () => {
   const [previewContent, setPreviewContent] = useState('');
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [currentFile, setCurrentFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   const fetchMarkdownList = async () => {
     setLoading(true);
@@ -72,6 +73,7 @@ const MarkdownManagement = () => {
     formData.append('file', file);
     formData.append('class', 'markdown');
 
+    setUploading(true);
     try {
       const response = await axios.post(getApiUrl(config.api.markdown.upload), formData);
       if (response.data.success) {
@@ -82,6 +84,8 @@ const MarkdownManagement = () => {
       }
     } catch (error) {
       message.error('上传失败: ' + error.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -177,8 +181,14 @@ const MarkdownManagement = () => {
           showUploadList={false}
           accept=".md,.markdown"
         >
-          <Button icon={<UploadOutlined />} type="primary" size="middle">
-            上传Markdown
+          <Button 
+            icon={<UploadOutlined />} 
+            type="primary" 
+            size="middle"
+            loading={uploading}
+            disabled={uploading}
+          >
+            {uploading ? '上传中...' : '上传Markdown'}
           </Button>
         </Upload>
       </div>

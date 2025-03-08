@@ -22,6 +22,7 @@ const ContentManagement = () => {
   const [loading, setLoading] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [currentContent, setCurrentContent] = useState(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     fetchContentList();
@@ -46,6 +47,7 @@ const ContentManagement = () => {
     formData.append('file', file);
     formData.append('module', currentModule);
 
+    setUploading(true);
     try {
       const response = await axios.post(getApiUrl(config.api.content.upload), formData);
       if (response.data.success) {
@@ -56,6 +58,8 @@ const ContentManagement = () => {
       }
     } catch (error) {
       message.error('上传失败: ' + error.message);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -215,9 +219,10 @@ const ContentManagement = () => {
             icon={<UploadOutlined />} 
             type="primary" 
             size="middle"
-            disabled={contentList.length >= 8}
+            disabled={contentList.length >= 8 || uploading}
+            loading={uploading}
           >
-            上传内容
+            {uploading ? '上传中...' : '上传内容'}
           </Button>
         </Upload>
         <span style={{ color: '#666' }}>
